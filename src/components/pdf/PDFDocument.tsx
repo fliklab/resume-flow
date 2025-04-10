@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Document,
   Page,
@@ -77,6 +77,17 @@ interface PDFDocumentProps {
 const PDFDocument: React.FC<PDFDocumentProps> = (props) => {
   const { resumeData, layoutConfig, isPreview = false } = props;
 
+  // 레이아웃 설정에 따라 요소 정렬
+  const sortedElements = useMemo(() => {
+    return layoutConfig
+      ? [...layoutConfig.elements].sort((a, b) => {
+          const orderA = a.order !== undefined ? a.order : 0;
+          const orderB = b.order !== undefined ? b.order : 0;
+          return orderA - orderB;
+        })
+      : null;
+  }, [layoutConfig]);
+
   // 데이터가 없는 경우 기본 미리보기 표시
   if (!resumeData) {
     return (
@@ -116,20 +127,12 @@ const PDFDocument: React.FC<PDFDocumentProps> = (props) => {
       </PDFViewer>
     );
   }
-
-  // 레이아웃 설정에 따라 요소 정렬
-  const sortedElements = [...layoutConfig.elements].sort((a, b) => {
-    const orderA = a.order !== undefined ? a.order : 0;
-    const orderB = b.order !== undefined ? b.order : 0;
-    return orderA - orderB;
-  });
-
   return (
     <PDFViewer style={{ width: "100%", height: "100vh" }}>
       <Document>
         <Page size="A4" style={styles.page}>
           {/* 레이아웃 설정에 따라 동적으로 렌더링 */}
-          {sortedElements.map((element: LayoutElement) => {
+          {sortedElements?.map((element: LayoutElement) => {
             const Renderer = getRenderer(element.type);
             const marginTop = element.marginTop || 0;
             const marginBottom = element.marginBottom || 0;

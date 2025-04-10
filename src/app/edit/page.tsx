@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ResumeForm from "@/components/forms/ResumeForm";
+import LayoutManager from "@/components/pdf/layout/LayoutManager";
 import PDFDocument from "@/components/pdf/PDFDocument";
 import { mockResumeData } from "@/data/mock/resume-data";
 import { mockLayoutData } from "@/data/mock/layout-mock";
 import { Resume } from "@/lib/types/resume";
 import { LayoutConfig } from "@/lib/types/layout";
-import LayoutVisualizer from "@/components/layout/LayoutVisualizer";
 
 export default function EditPage() {
   const [resumeData, setResumeData] = useState<Resume | null>(null);
@@ -75,6 +75,7 @@ export default function EditPage() {
             <h2 className="text-lg font-medium mb-4">실시간 미리보기</h2>
             <div className="border rounded">
               <PDFDocument
+                key={JSON.stringify(layoutData.elements)} // 레이아웃 데이터 변경이 반영되지 않는 경우가 있어서 강제로 key 값을 변경하여 재렌더링
                 resumeData={resumeData}
                 layoutConfig={layoutData}
                 isPreview={true}
@@ -95,9 +96,6 @@ export default function EditPage() {
                 }`}
                 onClick={() => setActiveTab("content")}
               >
-          {activeTab === "content" ? null : (
-            <LayoutVisualizer layoutConfig={layoutData} />
-          )}
                 내용 편집
               </button>
               <button
@@ -107,7 +105,18 @@ export default function EditPage() {
                     : "text-gray-500"
                 }`}
                 onClick={() => setActiveTab("layout")}
-            <LayoutVisualizer layoutConfig={layoutData} />
+              >
+                레이아웃 편집
+              </button>
+            </div>
+          </div>
+          {activeTab === "content" ? (
+            <ResumeForm resumeData={resumeData} onUpdate={handleResumeUpdate} />
+          ) : (
+            <LayoutManager
+              layoutConfig={layoutData}
+              onUpdate={handleLayoutUpdate}
+            />
           )}
         </div>
       </div>
