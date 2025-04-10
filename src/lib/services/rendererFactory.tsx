@@ -37,8 +37,39 @@ const styles = StyleSheet.create({
   },
 });
 
-// 데이터 소스에서 실제 데이터 추출하는 헬퍼 함수
-export const getDataFromSource = (source: string, resumeData: Resume): any => {
+// 먼저 필요한 인터페이스 정의
+interface RendererProps {
+  source: string;
+  settings?: RendererSettings;
+  resumeData: Resume;
+}
+
+interface RendererSettings {
+  fontSize?: number;
+  fontWeight?: string;
+  color?: string;
+  title?: string;
+  keyField?: string;
+  valueField?: string;
+  valueDelimiter?: string;
+  showDates?: boolean;
+  showHighlights?: boolean;
+  leftSource?: string;
+  rightSource?: string;
+  columns?: ColumnDefinition[];
+  [key: string]: unknown;
+}
+
+interface ColumnDefinition {
+  header: string;
+  field: string;
+  width?: string;
+}
+
+export const getDataFromSource = (
+  source: string,
+  resumeData: Resume
+): unknown => {
   if (!source) return null;
 
   // 배열 인덱스 처리 (예: work[0])
@@ -46,11 +77,19 @@ export const getDataFromSource = (source: string, resumeData: Resume): any => {
   if (arrayMatch) {
     const [, arrayName, indexStr, remaining] = arrayMatch;
     const index = parseInt(indexStr, 10);
-    const array = (resumeData as any)[arrayName];
+
+    // 타입 안전성을 위해 unknown으로 먼저 변환
+    const resumeDataUnknown = resumeData as unknown;
+    const resumeDataRecord = resumeDataUnknown as Record<string, unknown[]>;
+    const array = resumeDataRecord[arrayName];
+
     if (Array.isArray(array) && array.length > index) {
       if (remaining) {
         // 중첩 객체 처리 (예: work[0].position)
-        return getDataFromSource(remaining.substring(1), array[index]);
+        return getDataFromSource(
+          remaining.substring(1),
+          array[index] as unknown as Resume
+        );
       }
       return array[index];
     }
@@ -59,18 +98,22 @@ export const getDataFromSource = (source: string, resumeData: Resume): any => {
 
   // 중첩 객체 처리 (예: basics.name)
   const parts = source.split(".");
-  let data: any = resumeData;
+  let data: unknown = resumeData;
 
   for (const part of parts) {
     if (data === null || data === undefined) return null;
-    data = data[part];
+    data = (data as Record<string, unknown>)[part];
   }
 
   return data;
 };
 
-// 텍스트 렌더러
-export const TextRenderer = ({ source, settings, resumeData }: any) => {
+// 렌더러 컴포넌트에 타입 적용
+export const TextRenderer: React.FC<RendererProps> = ({
+  source,
+  settings,
+  resumeData,
+}) => {
   const data = getDataFromSource(source, resumeData);
   if (!data) return null;
 
@@ -78,18 +121,22 @@ export const TextRenderer = ({ source, settings, resumeData }: any) => {
     <Text
       style={[
         styles.text,
-        settings?.fontSize && { fontSize: settings.fontSize },
-        settings?.fontWeight === "bold" && styles.bold,
-        settings?.color && { color: settings.color },
+        settings?.fontSize ? { fontSize: settings.fontSize } : {},
+        settings?.fontWeight === "bold" ? styles.bold : {},
+        settings?.color ? { color: settings.color } : {},
       ]}
     >
-      {data}
+      {String(data)}
     </Text>
   );
 };
 
 // 섹션 렌더러
-export const SectionRenderer = ({ source, settings, resumeData }: any) => {
+export const SectionRenderer: React.FC<RendererProps> = ({
+  source,
+  settings,
+  resumeData,
+}) => {
   const title = settings?.title || "";
   const data = source ? getDataFromSource(source, resumeData) : null;
 
@@ -99,20 +146,26 @@ export const SectionRenderer = ({ source, settings, resumeData }: any) => {
         <Text
           style={[
             styles.subheading,
-            settings?.fontSize && { fontSize: settings.fontSize },
+            settings?.fontSize ? { fontSize: settings.fontSize } : {},
           ]}
         >
           {title}
         </Text>
       )}
-      {data && <Text style={styles.text}>{JSON.stringify(data)}</Text>}
+      {data ? <Text style={styles.text}>{JSON.stringify(data)}</Text> : null}
     </View>
   );
 };
 
 // 리스트 렌더러
-export const ListRenderer = ({ source, settings, resumeData }: any) => {
-  const data = getDataFromSource(source, resumeData);
+export const ListRenderer: React.FC<RendererProps> = ({
+  source,
+  settings,
+  resumeData,
+}) => {
+  const data = getDataFromSource(source, resumeData) as
+    | Record<string, unknown>[]
+    | null;
   if (!Array.isArray(data) || data.length === 0) return null;
 
   const keyField = settings?.keyField || "name";
@@ -122,10 +175,11 @@ export const ListRenderer = ({ source, settings, resumeData }: any) => {
   return (
     <View style={styles.section}>
       {data.map((item, index) => {
-        const key = item[keyField];
-        const value = Array.isArray(item[valueField])
-          ? item[valueField].join(valueDelimiter)
-          : item[valueField];
+        const key = String(item[keyField] || "");
+        const rawValue = item[valueField];
+        const value = Array.isArray(rawValue)
+          ? rawValue.join(valueDelimiter)
+          : String(rawValue || "");
 
         return (
           <View key={index} style={{ marginBottom: 5 }}>
@@ -139,12 +193,19 @@ export const ListRenderer = ({ source, settings, resumeData }: any) => {
 };
 
 // 워크 익스피리언스 렌더러
-export const WorkExperienceRenderer = ({
+export const WorkExperienceRenderer: React.FC<RendererProps> = ({
   source,
-  settings,
   resumeData,
-}: any) => {
-  const data = getDataFromSource(source, resumeData);
+}) => {
+  const data = getDataFromSource(source, resumeData) as Array<{
+    position: string;
+    name: string;
+    startDate: string;
+    endDate?: string;
+    summary?: string;
+    highlights?: string[];
+  }> | null;
+
   if (!Array.isArray(data) || data.length === 0) return null;
 
   return (
@@ -157,9 +218,11 @@ export const WorkExperienceRenderer = ({
           <Text style={styles.text}>
             {job.startDate} - {job.endDate || "현재"}
           </Text>
-          <Text style={styles.text}>{job.summary}</Text>
+          <Text style={job.summary ? styles.text : styles.text}>
+            {job.summary}
+          </Text>
           {job.highlights &&
-            job.highlights.map((highlight: string, idx: number) => (
+            job.highlights.map((highlight, idx) => (
               <Text key={idx} style={styles.text}>
                 • {highlight}
               </Text>
@@ -171,8 +234,14 @@ export const WorkExperienceRenderer = ({
 };
 
 // 테이블 렌더러
-export const TableRenderer = ({ source, settings, resumeData }: any) => {
-  const data = getDataFromSource(source, resumeData);
+export const TableRenderer: React.FC<RendererProps> = ({
+  source,
+  settings,
+  resumeData,
+}) => {
+  const data = getDataFromSource(source, resumeData) as
+    | Record<string, unknown>[]
+    | null;
   if (!Array.isArray(data) || data.length === 0) return null;
 
   const columns = settings?.columns || [];
@@ -186,7 +255,7 @@ export const TableRenderer = ({ source, settings, resumeData }: any) => {
           { borderBottomWidth: 1, borderBottomColor: "#ccc", paddingBottom: 5 },
         ]}
       >
-        {columns.map((col: any, colIndex: number) => (
+        {columns.map((col, colIndex) => (
           <Text
             key={colIndex}
             style={[styles.text, styles.bold, { flex: 1, width: col.width }]}
@@ -197,16 +266,18 @@ export const TableRenderer = ({ source, settings, resumeData }: any) => {
       </View>
 
       {/* 데이터 행 */}
-      {data.map((item: any, rowIndex: number) => (
+      {data.map((item, rowIndex) => (
         <View key={rowIndex} style={[styles.row, { paddingVertical: 5 }]}>
-          {columns.map((col: any, colIndex: number) => {
+          {columns.map((col, colIndex) => {
             // 날짜 범위 필드 처리 (startDate-endDate)
             let value = "";
             if (col.field.includes("-")) {
               const [startField, endField] = col.field.split("-");
-              value = `${item[startField]} - ${item[endField] || "현재"}`;
+              value = `${String(item[startField] || "")} - ${String(
+                item[endField] || "현재"
+              )}`;
             } else {
-              value = item[col.field] || "";
+              value = String(item[col.field] || "");
             }
 
             return (
@@ -225,15 +296,28 @@ export const TableRenderer = ({ source, settings, resumeData }: any) => {
 };
 
 // 두 컬럼 렌더러
-export const TwoColumnRenderer = ({ source, settings, resumeData }: any) => {
-  const data = getDataFromSource(source, resumeData);
-  if (!data) return null;
+export const TwoColumnRenderer: React.FC<RendererProps> = ({
+  source,
+  settings,
+  resumeData,
+}) => {
+  // source 매개변수 활용 (예: "source1|source2" 형식 파싱)
+  let leftSource = "";
+  let rightSource = "";
 
-  const leftSource = settings?.leftSource || "";
-  const rightSource = settings?.rightSource || "";
+  if (source && source.includes("|")) {
+    const sources = source.split("|");
+    leftSource = sources[0] || "";
+    rightSource = sources.length > 1 ? sources[1] : "";
+  } else {
+    // 기존 방식대로 settings에서 가져오기
+    leftSource = settings?.leftSource || "";
+    rightSource = settings?.rightSource || "";
+  }
   const leftData = leftSource
     ? getDataFromSource(leftSource, resumeData)
     : null;
+
   const rightData = rightSource
     ? getDataFromSource(rightSource, resumeData)
     : null;
@@ -241,12 +325,12 @@ export const TwoColumnRenderer = ({ source, settings, resumeData }: any) => {
   return (
     <View style={styles.row}>
       <View style={styles.col}>
-        {leftData && (
+        {leftData !== null && leftData !== undefined && (
           <Text style={styles.text}>{JSON.stringify(leftData)}</Text>
         )}
       </View>
       <View style={styles.col}>
-        {rightData && (
+        {rightData !== null && rightData !== undefined && (
           <Text style={styles.text}>{JSON.stringify(rightData)}</Text>
         )}
       </View>
@@ -255,8 +339,8 @@ export const TwoColumnRenderer = ({ source, settings, resumeData }: any) => {
 };
 
 // 렌더러 팩토리
-export const getRenderer = (type: RendererType) => {
-  const renderers: Record<string, React.FC<any>> = {
+export const getRenderer = (type: RendererType): React.FC<RendererProps> => {
+  const renderers: Record<string, React.FC<RendererProps>> = {
     [RendererType.TEXT]: TextRenderer,
     [RendererType.SECTION]: SectionRenderer,
     [RendererType.LIST]: ListRenderer,
