@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-// import ResumeForm from "@/components/forms/ResumeForm";
-// import LayoutManager from "@/components/pdf/layout/LayoutManager";
+import ResumeForm from "@/components/forms/ResumeForm";
 import PDFDocument from "@/components/pdf/PDFDocument";
 import { mockResumeData } from "@/data/mock/resume-data";
 import { mockLayoutData } from "@/data/mock/layout-mock";
 import { Resume } from "@/lib/types/resume";
 import { LayoutConfig } from "@/lib/types/layout";
+import LayoutVisualizer from "@/components/layout/LayoutVisualizer";
 
 export default function EditPage() {
   const [resumeData, setResumeData] = useState<Resume | null>(null);
@@ -23,15 +23,15 @@ export default function EditPage() {
     setIsLoading(false);
   }, []);
 
-  //   const handleResumeUpdate = (updatedResume: Resume) => {
-  //     setResumeData(updatedResume);
-  //     // 실제 구현에서는 여기서 저장 로직 추가
-  //   };
+  const handleResumeUpdate = (updatedResume: Resume) => {
+    setResumeData(updatedResume);
+    // 실제 구현에서는 여기서 저장 로직 추가
+  };
 
-  //   const handleLayoutUpdate = (updatedLayout: LayoutConfig) => {
-  //     setLayoutData(updatedLayout);
-  //     // 실제 구현에서는 여기서 저장 로직 추가
-  //   };
+  const handleLayoutUpdate = (updatedLayout: LayoutConfig) => {
+    setLayoutData(updatedLayout);
+    // 실제 구현에서는 여기서 저장 로직 추가
+  };
 
   if (isLoading) {
     return (
@@ -69,46 +69,8 @@ export default function EditPage() {
       </header>
 
       <div className="flex flex-col md:flex-row flex-grow">
-        {/* 왼쪽 패널 - 편집 영역 */}
-        <div className="w-full md:w-1/2 p-6 bg-gray-50 overflow-y-auto">
-          <div className="mb-4 border-b">
-            <div className="flex">
-              <button
-                className={`py-2 px-4 ${
-                  activeTab === "content"
-                    ? "border-b-2 border-blue-500 font-medium"
-                    : "text-gray-500"
-                }`}
-                onClick={() => setActiveTab("content")}
-              >
-                내용 편집
-              </button>
-              <button
-                className={`py-2 px-4 ${
-                  activeTab === "layout"
-                    ? "border-b-2 border-blue-500 font-medium"
-                    : "text-gray-500"
-                }`}
-                onClick={() => setActiveTab("layout")}
-              >
-                레이아웃 편집
-              </button>
-            </div>
-          </div>
-
-          {/* {activeTab === "content" ? (
-            <ResumeForm resumeData={resumeData} onUpdate={handleResumeUpdate} />
-          ) : (
-            <LayoutManager
-              layoutConfig={layoutData}
-              resumeData={resumeData}
-              onUpdate={handleLayoutUpdate}
-            />
-          )} */}
-        </div>
-
-        {/* 오른쪽 패널 - 미리보기 영역 */}
-        <div className="w-full md:w-1/2 p-6 bg-gray-100 overflow-y-auto">
+        {/* 왼쪽 패널 - 미리보기 영역 */}
+        <div className="w-full md:w-2/3 p-6 bg-gray-100 overflow-y-auto">
           <div className="bg-white shadow rounded-lg p-4">
             <h2 className="text-lg font-medium mb-4">실시간 미리보기</h2>
             <div className="border rounded">
@@ -119,6 +81,34 @@ export default function EditPage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* 오른쪽 패널 - 편집 영역 */}
+        <div className="w-full md:w-1/3 p-6 bg-gray-50 overflow-y-auto">
+          <div className="mb-4 border-b">
+            <div className="flex">
+              <button
+                className={`py-2 px-4 ${
+                  activeTab === "content"
+                    ? "border-b-2 border-blue-500 font-medium"
+                    : "text-gray-500"
+                }`}
+                onClick={() => setActiveTab("content")}
+              >
+          {activeTab === "content" ? null : (
+            <LayoutVisualizer layoutConfig={layoutData} />
+          )}
+                내용 편집
+              </button>
+              <button
+                className={`py-2 px-4 ${
+                  activeTab === "layout"
+                    ? "border-b-2 border-blue-500 font-medium"
+                    : "text-gray-500"
+                }`}
+                onClick={() => setActiveTab("layout")}
+            <LayoutVisualizer layoutConfig={layoutData} />
+          )}
         </div>
       </div>
     </div>
