@@ -10,7 +10,7 @@ import {
 } from "@react-pdf/renderer";
 import React from "react";
 
-import contentData from "../content/layoutData.json";
+import contentData from "../app/content/layoutData.json";
 
 // Types
 

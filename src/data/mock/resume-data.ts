@@ -1,4 +1,4 @@
-import { Resume } from "../../lib/types/resume";
+import { Resume } from "@/lib/types/resume";
 
 export const mockResumeData: Resume = {
   basics: {
