@@ -1,0 +1,46 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Gradient -->
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#FFDEEA" />
+        <stop offset="100%" stop-color="#DEEEFF" />
+      </linearGradient>
+      <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+        <polygon points="0,0 10,5 0,10" fill="#666666"/>
+      </marker>
+    </defs>
+    <rect width="800" height="400" fill="url(#bg)" />
+  
+    <!-- Resume: Paper with fold -->
+    <g>
+      <rect x="350" y="150" width="100" height="120" rx="6" fill="#FFFFFF" stroke="#999999" stroke-width="2"/>
+      <polygon points="430,150 450,150 450,170" fill="#E0E0E0" />
+      <line x1="360" y1="180" x2="440" y2="180" stroke="#CCCCCC" stroke-width="3" />
+      <line x1="360" y1="200" x2="440" y2="200" stroke="#CCCCCC" stroke-width="3" />
+      <line x1="360" y1="220" x2="410" y2="220" stroke="#CCCCCC" stroke-width="3" />
+      <text x="400" y="250" font-size="14" text-anchor="middle" fill="#888888">Resume</text>
+    </g>
+  
+    <!-- Arrow to PDF -->
+    <line x1="350" y1="200" x2="200" y2="200" stroke="#666666" stroke-width="2" marker-end="url(#arrow)" />
+    <!-- Arrow to Web -->
+    <line x1="450" y1="200" x2="600" y2="200" stroke="#666666" stroke-width="2" marker-end="url(#arrow)" />
+  
+    <!-- PDF: Red document with corner -->
+    <g>
+      <rect x="100" y="150" width="100" height="120" rx="6" fill="#FF4C4C"/>
+      <polygon points="180,150 200,150 200,170" fill="#D04040" />
+      <text x="150" y="210" font-size="16" text-anchor="middle" fill="#FFFFFF">PDF</text>
+    </g>
+  
+    <!-- Web: Browser window -->
+    <g>
+      <rect x="600" y="150" width="110" height="120" rx="8" fill="#FFFFFF" stroke="#999999" stroke-width="2"/>
+      <rect x="600" y="150" width="110" height="25" rx="8" fill="#DDDDDD" />
+      <circle cx="610" cy="162" r="4" fill="#FF5F56" />
+      <circle cx="620" cy="162" r="4" fill="#FFBD2E" />
+      <circle cx="630" cy="162" r="4" fill="#27C93F" />
+      <text x="655" y="220" font-size="14" text-anchor="middle" fill="#666666">WEB</text>
+    </g>
+  </svg>
+  

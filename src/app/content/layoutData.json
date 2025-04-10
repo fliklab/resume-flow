@@ -1,0 +1,105 @@
+{
+  "header": {
+    "title": "홍길동",
+    "subtitle": "Frontend Developer"
+  },
+  "basicInfo": {
+    "address": "Seoul, Korea",
+    "email": "your-email@example.com",
+    "phone": "010-1234-5678",
+    "website": "your-website.com"
+  },
+  "profile": [
+    "I have experience of developing & launching app from bottom using React Native.",
+    "I am interested in how the application Interacts with user."
+  ],
+  "sections": [
+    {
+      "title": "Employment History",
+      "content": {
+        "type": "table",
+        "data": {
+          "headers": ["Period", "Company", "Role", "Description"],
+          "rows": [
+            [
+              "2022.03 - Present",
+              "ABC Tech",
+              "Senior Developer",
+              "Frontend Team Lead"
+            ],
+            [
+              "2020.01 - 2022.02",
+              "Web Solutions",
+              "Developer",
+              "React-based Web Service Development"
+            ],
+            [
+              "2018.03 - 2019.12",
+              "Mobile Inc.",
+              "Junior Developer",
+              "React Native App Development"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "title": "Projects",
+      "content": {
+        "type": "table",
+        "data": {
+          "headers": ["Period", "Project", "Role", "Tech Stack"],
+          "rows": [
+            [
+              "2023.01 - 2023.12",
+              "Large Scale E-commerce Platform",
+              "Frontend Lead",
+              "Next.js, TypeScript"
+            ],
+            [
+              "2022.03 - 2022.12",
+              "Real-time Collaboration Tool",
+              "Full Stack",
+              "React, Node.js, Socket.io"
+            ],
+            [
+              "2021.01 - 2021.12",
+              "Cross-platform Mobile App",
+              "App Lead",
+              "React Native, Redux"
+            ]
+          ]
+        }
+      }
+    }
+  ],
+  "sideSections": [
+    {
+      "title": "Skills",
+      "content": {
+        "type": "text",
+        "data": "React, TypeScript, Node.js, Express, MongoDB, Docker, Kubernetes"
+      }
+    },
+    {
+      "title": "Education",
+      "content": {
+        "type": "card",
+        "data": {
+          "Seoul University": {
+            "Preiod": "2016.03 - 2018.02",
+            "Institution": "Seoul University",
+            "Major": "Computer Science",
+            "Degree": "Master"
+          },
+          "Korea University": {
+            "Preiod": "2012.03 - 2016.02",
+            "Institution": "Korea University",
+            "Major": "Software Engineering",
+            "Degree": "Bachelor"
+          }
+        }
+      }
+    }
+  ]
+}
