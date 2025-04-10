@@ -10,6 +10,9 @@ import {
   PDFViewer,
   Font,
 } from "@react-pdf/renderer";
+import { Resume } from "@/lib/types/resume";
+import { LayoutConfig, LayoutElement } from "@/lib/types/layout";
+import { getRenderer } from "@/lib/services/rendererFactory";
 
 Font.register({
   family: "IBMPlexSansKR",
@@ -56,38 +59,109 @@ const styles = StyleSheet.create({
     borderBottom: "1px solid #EEEEEE",
     marginVertical: 10,
   },
+  errorMessage: {
+    fontSize: 16,
+    color: "#FF0000",
+    textAlign: "center",
+    marginTop: 20,
+  },
 });
 
+interface PDFDocumentProps {
+  resumeData?: Resume;
+  layoutConfig?: LayoutConfig;
+  isPreview?: boolean;
+}
+
 // PDF 문서 컴포넌트
-const PDFDocument = () => {
+const PDFDocument: React.FC<PDFDocumentProps> = (props) => {
+  const { resumeData, layoutConfig, isPreview = false } = props;
+
+  // 데이터가 없는 경우 기본 미리보기 표시
+  if (!resumeData) {
+    return (
+      <PDFViewer style={{ width: "100%", height: "100vh" }}>
+        <Document>
+          <Page size="A4" style={styles.page}>
+            <View style={styles.section}>
+              <Text style={styles.heading}>데이터가 없습니다</Text>
+              <Text style={styles.text}>
+                이력서 데이터를 불러오지 못했습니다.
+              </Text>
+            </View>
+          </Page>
+        </Document>
+      </PDFViewer>
+    );
+  }
+
+  // 레이아웃 설정이 없는 경우 기본 미리보기 표시
+  if (
+    !layoutConfig ||
+    !layoutConfig.elements ||
+    layoutConfig.elements.length === 0
+  ) {
+    return (
+      <PDFViewer style={{ width: "100%", height: "100vh" }}>
+        <Document>
+          <Page size="A4" style={styles.page}>
+            <View style={styles.section}>
+              <Text style={styles.heading}>{resumeData.basics.name}</Text>
+              <Text style={styles.text}>
+                레이아웃 설정을 불러오지 못했습니다.
+              </Text>
+            </View>
+          </Page>
+        </Document>
+      </PDFViewer>
+    );
+  }
+
+  // 레이아웃 설정에 따라 요소 정렬
+  const sortedElements = [...layoutConfig.elements].sort((a, b) => {
+    const orderA = a.order !== undefined ? a.order : 0;
+    const orderB = b.order !== undefined ? b.order : 0;
+    return orderA - orderB;
+  });
+
   return (
     <PDFViewer style={{ width: "100%", height: "100vh" }}>
       <Document>
         <Page size="A4" style={styles.page}>
-          <View style={styles.section}>
-            <Text style={styles.heading}>Section</Text>
-            <Text style={styles.subheading}>HereSubheading</Text>
-            <Text style={styles.text}>text1</Text>
-            <Text style={styles.text}>text2</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.subheading}>경력 사항</Text>
-            <Text style={styles.text}>회사명: ABC 주식회사</Text>
-            <Text style={styles.text}>직위: 선임 개발자</Text>
-            <Text style={styles.text}>기간: 2020년 1월 - 현재</Text>
-            <Text style={styles.text}>
-              • React, TypeScript, Next.js를 활용한 웹 프론트엔드 개발
-            </Text>
-            <Text style={styles.text}>• 성능 최적화 및 코드 리팩토링</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.subheading}>학력</Text>
-            <Text style={styles.text}>대학교: 서울대학교</Text>
-            <Text style={styles.text}>전공: 컴퓨터공학</Text>
-            <Text style={styles.text}>기간: 2015년 - 2019년</Text>
-          </View>
+          {/* 레이아웃 설정에 따라 동적으로 렌더링 */}
+          {sortedElements.map((element: LayoutElement) => {
+            const Renderer = getRenderer(element.type);
+            const marginTop = element.marginTop || 0;
+            const marginBottom = element.marginBottom || 0;
+
+            return (
+              <View
+                key={element.id}
+                style={{
+                  marginTop,
+                  marginBottom,
+                  flexWrap: element.wrap ? "wrap" : "nowrap",
+                }}
+              >
+                <Renderer
+                  source={element.source}
+                  settings={element.settings}
+                  resumeData={resumeData}
+                />
+              </View>
+            );
+          })}
+
+          {/* 미리보기 모드일 때 표시할 텍스트 */}
+          {isPreview && (
+            <View
+              style={{ position: "absolute", bottom: 20, left: 30, right: 30 }}
+            >
+              <Text style={{ fontSize: 8, color: "#999", textAlign: "center" }}>
+                이 문서는 미리보기입니다. 실제 PDF와 다를 수 있습니다.
+              </Text>
+            </View>
+          )}
         </Page>
       </Document>
     </PDFViewer>
