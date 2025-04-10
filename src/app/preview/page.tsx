@@ -65,11 +65,7 @@ export default function PreviewPage() {
 
       <main className="flex-grow p-6 bg-gray-100">
         <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-          <PDFDocument
-            resumeData={resumeData}
-            layoutConfig={layoutData}
-            isPreview={true}
-          />
+          <PDFDocument />
         </div>
       </main>
     </div>
